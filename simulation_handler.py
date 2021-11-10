@@ -41,7 +41,7 @@ class BufferSimulationHandler(TransitionHandler):
         i = 0
 
         while i < max_iterations:
-            cur_buffer += cur_state * supply_per_machine - demand
+            cur_buffer += cur_state * supply_per_machine - demand[i % max_iterations]
             cur_state = self.choose_next_state(cur_state)[0]
 
             cur_buffer = max(self.minimum_size, cur_buffer)
