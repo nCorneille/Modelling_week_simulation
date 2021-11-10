@@ -2,7 +2,7 @@ import os
 
 from simulation_handler import *
 from matrix_handler import *
-
+from sequence_analysis import *
 
 
 
@@ -35,3 +35,4 @@ buffer_model_2_mch = BufferSimulationHandler(model_2_mch)
 buffer = buffer_model_2_mch.buffer_simulation(2, 0, 1000, 1, 1)
 print(buffer[0])
 print(buffer[1])
+print(SequenceAnalyser.get_first_sequence(np.array(buffer[1]) == 0, 2))
