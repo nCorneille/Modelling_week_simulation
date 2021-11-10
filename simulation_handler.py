@@ -4,11 +4,11 @@ from matrix_handler import *
 class TransitionHandler:
     def __init__(self, markov_model: MarkovChainModel):
         self.markov_model = markov_model
-        self.transition_matrix = evaluate_model(markov_model.matrix, markov_model.values)
+        self.transition_matrix = markov_model.matrix
 
-    def choose_next_state(self, current_state: int):
-        row = self.transition_matrix[current_state]
-        next_state = np.random.choice([0, 1, 2], 1, p=[row[0, 0], row[0, 1], row[0, 2]])
+    def choose_next_state(self, current_state: int, m: int):
+        row = self.transition_matrix
+        next_state = np.random.choice([i for i in range(m)], 1, p=[row[current_state, i] for i in range(m)])
         return next_state
 
     def transition_simulation(self, start_state, iterations):
@@ -41,8 +41,8 @@ class BufferSimulationHandler(TransitionHandler):
         i = 0
 
         while i < max_iterations:
-            cur_buffer += cur_state * supply_per_machine - demand[i % max_iterations]
-            cur_state = self.choose_next_state(cur_state)[0]
+            cur_buffer += cur_state * supply_per_machine - demand[i % len(demand)]
+            cur_state = self.choose_next_state(cur_state, self.transition_matrix.shape[0])[0]
 
             cur_buffer = max(self.minimum_size, cur_buffer)
             cur_buffer = min(self.maximum_size, cur_buffer)

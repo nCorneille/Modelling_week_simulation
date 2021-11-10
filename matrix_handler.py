@@ -1,6 +1,28 @@
 import numpy as np
-from scipy import optimize
+import math
 import csv
+
+
+def make_matrix(m: int, lambda_, mu):
+    out = np.tile(np.zeros(m+1), (m+1,1))
+
+    pl = np.exp(-lambda_)
+    pm = np.exp(-mu)
+
+    for i in range(m+1):
+        for j in range(m+1):
+            if i == m:
+                out[i][j] = math.comb(m, j) * (1-pl)**(m-j) * pl**j
+            if j == 0 and i != m:
+                out[i][j] = (1-pl)**i * pm
+            if j == i+1 and i != m:
+                out[i][j] = pl**i * (1-pm)
+            if i >= j > 0 and i != m:
+                out[i][j] = math.comb(i, j) * pl**j * (1-pl)**(i-j) * pm \
+                            + math.comb(i, j-1) * pl**(j-1) * (1-pl)**(i-(j-1)) * (1-pm)
+
+    return np.matrix(out)
+
 
 def read_model(filename: str, params: dict) -> np.array:
     """
@@ -73,5 +95,9 @@ class MarkovChainModel:
         """
         self.params = params
         self.values = values
-        self.matrix = read_model(matrix_path, params)
+        self.matrix = evaluate_model(read_model(matrix_path, params), values)
+        self.dim = self.matrix.shape[0]
+
+    def change_matrix(self, matrix):
+        self.matrix = matrix
         self.dim = self.matrix.shape[0]

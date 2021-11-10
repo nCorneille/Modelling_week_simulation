@@ -30,21 +30,29 @@ def fine(T):
 #lambda = 1 * 10^-5
 #mu = 0.083
 
-
+m = 10
 demand_data = csv_reader("demand_data")
 
+
+MAX_ITER = 24 * 365
+START_BUFFER = 0
+MAX_BUFFER = 644000
+MCH_POWER = 3000
+START_STATE = m
+
+LAMBDA = 5e-3
+MU = 1
+
 model_2_mch = MarkovChainModel("matrix_2",
-                              {"lambda": "5e-3", "mu": "1", "exp": "exp"},
-                              {"exp": np.exp})
+                              {"lambda": "LAMBDA", "mu": "MU", "exp": "exp"},
+                              {"exp": np.exp, "LAMBDA": LAMBDA, "MU": MU})
+
+mat = make_matrix(m, LAMBDA, MU)
+model_2_mch.change_matrix(mat)
 
 model_2_mch_sim = TransitionHandler(model_2_mch)
 
-MAX_ITER = 24 * 365
-START_BUFFER = 100000
-MCH_POWER = np.mean(demand_data)/3 * 2
-START_STATE = 2
-
-buffer_model_2_mch = BufferSimulationHandler(model_2_mch)
+buffer_model_2_mch = BufferSimulationHandler(model_2_mch, MAX_BUFFER)
 buffer = buffer_model_2_mch.buffer_simulation(START_STATE, START_BUFFER, MAX_ITER, demand_data, MCH_POWER)
 print(buffer[0])
 print(buffer[1])
