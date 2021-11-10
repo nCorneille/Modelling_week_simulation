@@ -3,6 +3,7 @@ import os
 from simulation_handler import *
 from matrix_handler import *
 from sequence_analysis import *
+from fine_handler import *
 
 
 
@@ -32,7 +33,16 @@ states = model_2_mch_sim.transition_simulation(0, 1000)
 #print(amount_of_zero/1001)
 
 buffer_model_2_mch = BufferSimulationHandler(model_2_mch)
-buffer = buffer_model_2_mch.buffer_simulation(2, 0, 1000, 1, 1)
+buffer = buffer_model_2_mch.buffer_simulation(2, 0, 100, 1, 1)
 print(buffer[0])
 print(buffer[1])
-print(SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 8))
+
+L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
+
+print(L[0])
+print(FineHandler(lambda x: x).to_days_between(L[0], L[1]))
+
+def fine(T):
+    return 0 if T < 8 else 35 + np.floor((T-8)/4) * 20
+
+print(FineHandler(fine).calculate_fine(L[0],L[1]))

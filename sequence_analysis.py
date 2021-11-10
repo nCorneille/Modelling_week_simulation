@@ -40,7 +40,8 @@ class SequenceAnalyser:
     @staticmethod
     def get_length_true_sequences(conditioned_data, minimum_length):
         length = len(conditioned_data)
-        out = []
+        out_lengths = []
+        out_indices = []
 
         sequence_length = 0
         for i in range(length):
@@ -48,8 +49,9 @@ class SequenceAnalyser:
                 sequence_length += 1
             elif not(conditioned_data[i]) and sequence_length != 0:
                 if sequence_length >= minimum_length:
-                    out.append((i-sequence_length, sequence_length))
+                    out_lengths.append(sequence_length)
+                    out_indices.append(i-sequence_length)
                 sequence_length = 0
 
-        return out
+        return out_lengths, out_indices
 
