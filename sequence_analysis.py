@@ -36,3 +36,20 @@ class SequenceAnalyser:
                 break
 
         return out
+
+    @staticmethod
+    def get_length_true_sequences(conditioned_data, minimum_length):
+        length = len(conditioned_data)
+        out = []
+
+        sequence_length = 0
+        for i in range(length):
+            if conditioned_data[i]:
+                sequence_length += 1
+            elif not(conditioned_data[i]) and sequence_length != 0:
+                if sequence_length >= minimum_length:
+                    out.append((i-sequence_length, sequence_length))
+                sequence_length = 0
+
+        return out
+
