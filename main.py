@@ -116,7 +116,7 @@ buffer_simulation_handler = BufferSimulationHandler(machines, MAX_BUFFER)
 
 buffer = buffer_simulation_handler.buffer_simulation(START_BUFFER, MAX_ITER, demand_data)
 L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
-fail_rates = [MACHINE_2_FAIL_RATE]
+fail_rates = [MACHINE_1_FAIL_RATE]
 fines = [FineHandler(fine).calculate_fine(L[0], L[1])]
 
 #MACHINE_3_FAIL_RATE += 0.25
@@ -124,14 +124,20 @@ fines = [FineHandler(fine).calculate_fine(L[0], L[1])]
 for i in range(100):
     print(fines[i])
     print(i)
-    #MACHINE_2_FAIL_RATE += 0.001
-    MACHINE_3_FAIL_RATE += 0.005
+    MACHINE_1_FAIL_RATE += 5e-4
+    #MACHINE_2_FAIL_RATE += 1.65e-3
+    #MACHINE_3_FAIL_RATE += 0.005
 
-    fail_rates.append(MACHINE_3_FAIL_RATE)
+    fail_rates.append(MACHINE_1_FAIL_RATE)
 
     fine_list = []
     for j in range(10):
         print(f"|-{j}")
+        machine_1_matrix = make_matrix(MACHINE_1_AMOUNT, MACHINE_1_FAIL_RATE, MACHINE_1_REPAIR_RATE)
+        machine_1_mm.change_matrix(machine_1_matrix)
+        machine_1_transition_handler = TransitionHandler(machine_1_mm, MACHINE_1_POWER, MACHINE_1_AMOUNT,
+                                                         HEAT_PUMP_POLICY)
+
         machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
         machine_2_mm.change_matrix(machine_2_matrix)
         machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, MACHINE_2_AMOUNT, GAS_BOILER_POLICY)
