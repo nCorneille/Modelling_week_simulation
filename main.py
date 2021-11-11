@@ -53,8 +53,22 @@ machine_1_transition_handler = TransitionHandler(machine_1_mm, MACHINE_1_POWER, 
 
 
 def GAS_BOILER_POLICY(current_buffer, maximum_buffer):
-    #return 1-current_buffer / maximum_buffer
-    return 0 if current_buffer/maximum_buffer > 0.5 else 1
+    r = current_buffer / maximum_buffer
+    if r <= 0.2:
+        return 1
+    elif 0.2 < r <= 0.75:
+        return 0.5
+    else:
+        return 0
+
+def CHP_POLICY(current_buffer, maximum_buffer):
+    r = current_buffer / maximum_buffer
+    if r > 0.9:
+        return 0
+    elif 0.9 >= r > 0.85:
+        return 0.5
+    else:
+        return 1
 
 
 # MACHINE 2: CHP
@@ -67,7 +81,7 @@ MACHINE_2_POWER = 900
 machine_2_mm = MarkovChainModel()
 machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
 machine_2_mm.change_matrix(machine_2_matrix)
-machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, MACHINE_2_AMOUNT, GAS_BOILER_POLICY)
+machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, MACHINE_2_AMOUNT, CHP_POLICY)
 
 # MACHINE 3: GAS BOILERS
 MACHINE_3_AMOUNT = 3
@@ -99,27 +113,33 @@ L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
 fail_rates = [MACHINE_2_FAIL_RATE]
 fines = [FineHandler(fine).calculate_fine(L[0], L[1])]
 
-for i in range(10):
+#MACHINE_3_FAIL_RATE += 0.25
+
+for i in range(100):
     print(i)
-    MACHINE_2_FAIL_RATE += MACHINE_2_FAIL_RATE
-    MACHINE_3_FAIL_RATE += MACHINE_3_FAIL_RATE
+    #MACHINE_2_FAIL_RATE += 0.001
+    MACHINE_3_FAIL_RATE += 0.005
 
-    fail_rates.append(MACHINE_2_FAIL_RATE)
+    fail_rates.append(MACHINE_3_FAIL_RATE)
 
-    machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
-    machine_2_mm.change_matrix(machine_2_matrix)
-    machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, MACHINE_2_AMOUNT, GAS_BOILER_POLICY)
+    fine_list = []
+    for j in range(10):
+        print(f"|-{j}")
+        machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
+        machine_2_mm.change_matrix(machine_2_matrix)
+        machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, MACHINE_2_AMOUNT, GAS_BOILER_POLICY)
 
-    machine_3_matrix = make_matrix(MACHINE_3_AMOUNT, MACHINE_3_FAIL_RATE, MACHINE_3_REPAIR_RATE)
-    machine_3_mm.change_matrix(machine_3_matrix)
-    machine_3_transition_handler = TransitionHandler(machine_3_mm, MACHINE_3_POWER, MACHINE_3_AMOUNT, GAS_BOILER_POLICY)
+        machine_3_matrix = make_matrix(MACHINE_3_AMOUNT, MACHINE_3_FAIL_RATE, MACHINE_3_REPAIR_RATE)
+        machine_3_mm.change_matrix(machine_3_matrix)
+        machine_3_transition_handler = TransitionHandler(machine_3_mm, MACHINE_3_POWER, MACHINE_3_AMOUNT, GAS_BOILER_POLICY)
 
-    machines = [machine_1_transition_handler, machine_2_transition_handler, machine_3_transition_handler]
-    buffer_simulation_handler = BufferSimulationHandler(machines, MAX_BUFFER)
+        machines = [machine_1_transition_handler, machine_2_transition_handler, machine_3_transition_handler]
+        buffer_simulation_handler = BufferSimulationHandler(machines, MAX_BUFFER)
 
-    buffer = buffer_simulation_handler.buffer_simulation(START_BUFFER, MAX_ITER, demand_data)
-    L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
-    fines.append(FineHandler(fine).calculate_fine(L[0], L[1]))
+        buffer = buffer_simulation_handler.buffer_simulation(START_BUFFER, MAX_ITER, demand_data)
+        L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
+        fine_list.append(FineHandler(fine).calculate_fine(L[0], L[1]))
+    fines.append(np.mean(fine_list))
 
 f = open("output.csv", "w")
 writer = csv.writer(f)

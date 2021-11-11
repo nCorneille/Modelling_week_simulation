@@ -13,7 +13,11 @@ class TransitionHandler:
     def choose_next_state(self, current_state: int, m: int):
         row = self.transition_matrix
         next_state = np.random.choice([i for i in range(m)], 1, p=[row[current_state, i] for i in range(m)])[0]
-        return next_state
+
+        if self.supply_per_machine != 0:
+            return next_state
+        else:
+            return next_state if next_state > current_state else current_state
 
     def update_state(self, m):
         self.cur_state = self.choose_next_state(self.cur_state, m)
