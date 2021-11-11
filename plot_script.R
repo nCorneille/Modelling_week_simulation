@@ -1,6 +1,6 @@
+setwd("C:/Users/20161443/PycharmProjects/pythonProject1")
 library(ggplot2)
 
-fines = c(0, 0, 75.0, 220.0, 350.0, 350.0, 570.0, 730.0, 730.0, 1040.0, 1290.0)
-fail_rates = c(0.00165, 0.10165, 0.20165, 0.30165, 0.40164999999999995, 0.5016499999999999, 0.6016499999999999, 0.7016499999999999, 0.8016499999999999, 0.9016499999999998, 1.00165)
+data = read.csv('output.csv', header = FALSE, col.names = c("Failure_rates", "Fines"))
 
-plot(fail_rates, fines)
+plot(data$Failure_rates, data$Fines)
