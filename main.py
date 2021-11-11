@@ -36,8 +36,13 @@ def fine(T):
 demand_data = csv_reader("demand_data")
 
 MAX_ITER = 24 * 365
-START_BUFFER = 0
-MAX_BUFFER = 644000
+START_BUFFER = 30000
+MAX_BUFFER = 0.0011 * 30 * 2 * 750 * 1000 # = 49500
+
+def HEAT_PUMP_POLICY(current_buffer, maximum_buffer):
+    r = current_buffer / maximum_buffer
+    return 1 if r <= 0.95 else 0
+    # return 1
 
 # MACHINE 1: HEAT PUMPS
 MACHINE_1_AMOUNT = 5
@@ -49,17 +54,18 @@ MACHINE_1_POWER = 1800
 machine_1_mm = MarkovChainModel()
 machine_1_matrix = make_matrix(MACHINE_1_AMOUNT, MACHINE_1_FAIL_RATE, MACHINE_1_REPAIR_RATE)
 machine_1_mm.change_matrix(machine_1_matrix)
-machine_1_transition_handler = TransitionHandler(machine_1_mm, MACHINE_1_POWER, MACHINE_1_AMOUNT)
+machine_1_transition_handler = TransitionHandler(machine_1_mm, MACHINE_1_POWER, MACHINE_1_AMOUNT, HEAT_PUMP_POLICY)
 
 
 def GAS_BOILER_POLICY(current_buffer, maximum_buffer):
     r = current_buffer / maximum_buffer
-    if r <= 0.2:
+    if r <= 0.4:
         return 1
-    elif 0.2 < r <= 0.75:
+    elif 0.4 < r <= 0.75:
         return 0.5
     else:
         return 0
+
 
 def CHP_POLICY(current_buffer, maximum_buffer):
     r = current_buffer / maximum_buffer
@@ -76,7 +82,7 @@ MACHINE_2_AMOUNT = 4
 MACHINE_2_FAIL_RATE = 1.65e-3
 MACHINE_2_REPAIR_RATE = 0.106
 MACHINE_2_START_STATE = MACHINE_2_AMOUNT
-MACHINE_2_POWER = 900
+MACHINE_2_POWER = 900 * 0.2
 
 machine_2_mm = MarkovChainModel()
 machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
@@ -85,7 +91,7 @@ machine_2_transition_handler = TransitionHandler(machine_2_mm, MACHINE_2_POWER, 
 
 # MACHINE 3: GAS BOILERS
 MACHINE_3_AMOUNT = 3
-MACHINE_3_FAIL_RATE = 5e-3
+MACHINE_3_FAIL_RATE = 0
 MACHINE_3_REPAIR_RATE = 1
 MACHINE_3_START_STATE = MACHINE_3_AMOUNT
 MACHINE_3_POWER = 6000
@@ -116,6 +122,7 @@ fines = [FineHandler(fine).calculate_fine(L[0], L[1])]
 #MACHINE_3_FAIL_RATE += 0.25
 
 for i in range(100):
+    print(fines[i])
     print(i)
     #MACHINE_2_FAIL_RATE += 0.001
     MACHINE_3_FAIL_RATE += 0.005
@@ -147,4 +154,3 @@ for i in range(len(fines)):
     print(f"{fail_rates[i]},{fines[i]}")
     writer.writerow([fail_rates[i], fines[i]])
 f.close()
-

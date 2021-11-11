@@ -57,12 +57,13 @@ class BufferSimulationHandler():
         i = 0
 
         while i < max_iterations:
+            cur_buffer -= demand[i % len(demand)]
+
             for model in self.markov_models:
                 model.apply_policy(cur_buffer, self.maximum_size)
                 cur_buffer += model.cur_state * model.supply_per_machine
                 model.update_state(model.transition_matrix.shape[0])
 
-            cur_buffer -= demand[i % len(demand)]
             cur_buffer = max(self.minimum_size, cur_buffer)
             cur_buffer = min(self.maximum_size, cur_buffer)
 

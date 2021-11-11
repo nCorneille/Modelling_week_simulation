@@ -6,6 +6,9 @@ class FineHandler:
 
     def to_days_between(self, interval_lengths, interval_indices):
         assert (len(interval_lengths) == len(interval_indices))
+        if len(interval_indices) == 0:
+            return []
+
         out = [interval_indices[0]]
 
         for i in range(1, len(interval_lengths)):
@@ -15,6 +18,9 @@ class FineHandler:
 
     def calculate_fine(self, interval_lengths, interval_indices):
         assert(len(interval_lengths) == len(interval_indices))
+        if len(interval_lengths) == 0:
+            return 0
+
         should_skip = True
         days_between = self.to_days_between(interval_lengths, interval_indices)
 
