@@ -1,11 +1,10 @@
 import os
+import csv
 
 from simulation_handler import *
 from matrix_handler import *
 from sequence_analysis import *
 from fine_handler import *
-
-import matplotlib.pyplot as plt
 
 
 def csv_reader(filename):
@@ -97,12 +96,15 @@ buffer_simulation_handler = BufferSimulationHandler(machines, MAX_BUFFER)
 
 buffer = buffer_simulation_handler.buffer_simulation(START_BUFFER, MAX_ITER, demand_data)
 L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
+fail_rates = [MACHINE_2_FAIL_RATE]
 fines = [FineHandler(fine).calculate_fine(L[0], L[1])]
 
 for i in range(10):
     print(i)
-    MACHINE_2_FAIL_RATE += 0.1
-    MACHINE_3_FAIL_RATE += 0.1
+    MACHINE_2_FAIL_RATE += MACHINE_2_FAIL_RATE
+    MACHINE_3_FAIL_RATE += MACHINE_3_FAIL_RATE
+
+    fail_rates.append(MACHINE_2_FAIL_RATE)
 
     machine_2_matrix = make_matrix(MACHINE_2_AMOUNT, MACHINE_2_FAIL_RATE, MACHINE_2_REPAIR_RATE)
     machine_2_mm.change_matrix(machine_2_matrix)
@@ -119,6 +121,10 @@ for i in range(10):
     L = SequenceAnalyser.get_length_true_sequences(np.array(buffer[1]) == 0, 1)
     fines.append(FineHandler(fine).calculate_fine(L[0], L[1]))
 
-print(fines)
-
+f = open("output.csv", "w")
+writer = csv.writer(f)
+for i in range(len(fines)):
+    print(f"{fail_rates[i]},{fines[i]}")
+    writer.writerow([fail_rates[i], fines[i]])
+f.close()
 
