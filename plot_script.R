@@ -4,4 +4,4 @@ library(MASS)
 
 data = read.csv('output.csv', header = FALSE, col.names = c("Failure_rates", "Fines"))
 
-ggplot(data, aes(x=Failure_rates, y=Fines)) + geom_point() + geom_smooth(method=glm)
+ggplot(data, aes(x=Failure_rates, y=Fines)) + geom_point() 
