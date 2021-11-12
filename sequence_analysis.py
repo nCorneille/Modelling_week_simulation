@@ -45,9 +45,9 @@ class SequenceAnalyser:
 
         sequence_length = 0
         for i in range(length):
-            if conditioned_data[i]:
+            if conditioned_data[i] and i != length-1:
                 sequence_length += 1
-            elif not(conditioned_data[i]) and sequence_length != 0:
+            elif (not(conditioned_data[i]) and sequence_length != 0) or i == length-1:
                 if sequence_length >= minimum_length:
                     out_lengths.append(sequence_length)
                     out_indices.append(i-sequence_length)

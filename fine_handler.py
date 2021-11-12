@@ -17,7 +17,7 @@ class FineHandler:
         return out
 
     def calculate_fine(self, interval_lengths, interval_indices):
-        assert(len(interval_lengths) == len(interval_indices))
+        assert (len(interval_lengths) == len(interval_indices))
         if len(interval_lengths) == 0:
             return 0
 
